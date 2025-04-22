@@ -16,7 +16,7 @@
             animation: gradient 15s ease infinite;
             height: 100vh;
             overflow: hidden;
-            touch-action: none; /* Prevent unwanted touch behaviors */
+            touch-action: manipulation; /* Allow tap-to-focus */
         }
         
         @keyframes gradient {
@@ -57,7 +57,7 @@
         
         #mole-field {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); /* Adjusted for 12 holes */
+            grid-template-columns: repeat(4, 1fr); /* 12 holes */
             gap: 15px;
             margin-bottom: 30px;
         }
@@ -127,6 +127,15 @@
             margin-top: 25px;
             font-size: 1rem;
             color: #b3e5fc;
+        }
+        
+        /* Hidden input for keyboard */
+        #keyboard-input {
+            position: absolute;
+            left: -9999px; /* Off-screen */
+            opacity: 0;
+            width: 1px;
+            height: 1px;
         }
         
         /* Stars background */
@@ -233,7 +242,7 @@
             
             #game-container {
                 padding: 15px;
-                max-height: 80vh; /* Further adjust for mobile keyboard */
+                max-height: 80vh; /* Adjust for mobile keyboard */
             }
         }
     </style>
@@ -253,6 +262,7 @@
     
     <!-- Main game container -->
     <div id="game-container" tabindex="0">
+        <input id="keyboard-input" type="text" aria-hidden="true">
         <h1>Galaxy Whack-a-Mole</h1>
         <div id="score-display">Score: 0</div>
         <div id="mole-field"></div>
@@ -260,6 +270,7 @@
         <div id="instructions">
             <p>Type or tap the letter shown on the mole to score points!</p>
             <p>Wrong key or 3 missed letters = Game Over. Speed increases every 5 points!</p>
+            <p>On mobile, tap the screen to show the keyboard if it doesn't appear.</p>
         </div>
     </div>
 

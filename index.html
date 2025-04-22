@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaxy Whack-a-Mole Typing Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            color: white;
+            background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #000000);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            height: 100vh;
+            overflow: hidden;
+            touch-action: none; /* Prevent unwanted touch behaviors */
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        #game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-height: 90vh; /* Ensure visibility above mobile keyboard */
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            background: linear-gradient(to right, #ff8a00, #da1b60, #8a2be2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        #score-display {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #4fc3f7;
+        }
+        
+        #mole-field {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* Adjusted for 12 holes */
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .hole {
+            width: 70px;
+            height: 70px;
+            background-color: #1a1a2e;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+            border: 2px solid #4a148c;
+        }
+        
+        .mole {
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle at 30% 30%, #ff9800, #f57c00);
+            border-radius: 50%;
+            position: absolute;
+            bottom: -50px;
+            left: 10px;
+            transition: bottom 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            text-shadow: 0 0 5px black;
+            box-shadow: 0 0 15px rgba(255, 152, 0, 0.5);
+            user-select: none; /* Prevent text selection */
+        }
+        
+        .mole.up {
+            bottom: 10px;
+            animation: glow 1s infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 0 10px rgba(255, 152, 0, 0.5); }
+            to { box-shadow: 0 0 20px rgba(255, 152, 0, 0.8); }
+        }
+        
+        #start-btn {
+            padding: 15px 30px; /* Larger for touch */
+            font-size: 1.2rem;
+            background: linear-gradient(to right, #8a2be2, #da1b60);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+            min-width: 150px; /* Ensure touch target size */
+        }
+        
+        #start-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.8);
+        }
+        
+        #instructions {
+            margin-top: 25px;
+            font-size: 1rem;
+            color: #b3e5fc;
+        }
+        
+        /* Stars background */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration) infinite ease-in-out;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+        
+        /* Game over overlay */
+        #game-over {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            flex-direction: column;
+        }
+        
+        #game-over-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(138, 43, 226, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        #restart-btn {
+            padding: 15px 30px; /* Larger for touch */
+            font-size: 1.2rem;
+            background: linear-gradient(to right, #00c853, #00e676);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+            min-width: 150px; /* Ensure touch target size */
+        }
+        
+        #restart-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 200, 83, 0.5);
+        }
+        
+        /* Mobile adjustments */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            #score-display {
+                font-size: 1.2rem;
+            }
+            
+            #mole-field {
+                grid-template-columns: repeat(3, 1fr); /* 3 columns for mobile */
+                gap: 10px;
+            }
+            
+            .hole {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .mole {
+                width: 35px;
+                height: 35px;
+                left: 7.5px;
+                font-size: 0.9rem;
+            }
+            
+            #start-btn, #restart-btn {
+                padding: 12px 25px;
+                font-size: 1rem;
+                min-width: 120px;
+            }
+            
+            #instructions {
+                font-size: 0.9rem;
+            }
+            
+            #game-container {
+                padding: 15px;
+                max-height: 80vh; /* Further adjust for mobile keyboard */
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Stars background -->
+    <div class="stars" id="stars"></div>
+    
+    <!-- Game over overlay -->
+    <div id="game-over">
+        <div id="game-over-content">
+            <h2>Game Over!</h2>
+            <p id="final-score">Your score: 0</p>
+            <button id="restart-btn">Play Again</button>
+        </div>
+    </div>
+    
+    <!-- Main game container -->
+    <div id="game-container" tabindex="0">
+        <h1>Galaxy Whack-a-Mole</h1>
+        <div id="score-display">Score: 0</div>
+        <div id="mole-field"></div>
+        <button id="start-btn">Start Game</button>
+        <div id="instructions">
+            <p>Type or tap the letter shown on the mole to score points!</p>
+            <p>Wrong key or 3 missed letters = Game Over. Speed increases every 5 points!</p>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

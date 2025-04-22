@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const restartBtn = document.getElementById('restart-btn');
     const starsContainer = document.getElementById('stars');
     const gameContainer = document.getElementById('game-container');
+    const keyboardInput = document.getElementById('keyboard-input');
     
     // Create stars for background
     function createStars() {
@@ -33,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let moleTimer;
     let consecutiveMisses = 0; // Track consecutive missed moles
     
-    // Create holes (reduced to 12)
+    // Create holes (12 holes)
     for (let i = 0; i < 12; i++) {
         const hole = document.createElement('div');
         hole.className = 'hole';
@@ -111,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const moleLetter = currentMole.textContent;
         
         if (pressedKey === moleLetter) {
+
             // Correct key pressed
             currentMole.classList.remove('up');
             currentMole = null;
@@ -122,19 +124,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (score % 5 === 0) {
                 gameSpeed = Math.max(500, gameSpeed - 100); // Slightly increase speed by 100ms
             }
+            
+            // Refocus input for mobile keyboard
+            keyboardInput.focus();
         } else if (/^[A-Z]$/.test(pressedKey)) {
             // Wrong key pressed (only if it's a letter)
             endGame();
         }
     });
     
-    // Handle touch input
+    // Handle touch input on moles
     moles.forEach(mole => {
         mole.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Prevent default touch behaviors
             if (!gameActive || !currentMole || mole !== currentMole) return;
             
-            // Correct mole那么1.1 Tap on the mole counts as a correct hit
+            // Correct mole tapped
             currentMole.classList.remove('up');
             currentMole = null;
             score++;
@@ -149,7 +153,17 @@ document.addEventListener('DOMContentLoaded', () => {
             // Schedule next mole immediately
             clearTimeout(moleTimer);
             moleTimer = setTimeout(showRandomMole, gameSpeed);
+            
+            // Refocus input for mobile keyboard
+            keyboardInput.focus();
         });
+    });
+    
+    // Handle touch on game container to focus input
+    gameContainer.addEventListener('touchstart', () => {
+        if (gameActive) {
+            keyboardInput.focus();
+        }
     });
     
     // Start game
@@ -164,8 +178,8 @@ document.addEventListener('DOMContentLoaded', () => {
         startBtn.disabled = true;
         gameOverScreen.style.display = 'none';
         
-        // Focus game container for mobile keyboard
-        gameContainer.focus();
+        // Focus input for mobile keyboard
+        keyboardInput.focus();
         
         // Hide all moles at start
         moles.forEach(mole => mole.classList.remove('up'));
